@@ -7,13 +7,15 @@ import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.Produces;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+
+import errorhandling.API_Exception;
+import facades.FacadeExample;
+import facades.UserFacade;
 import utils.EMF_Creator;
 
 /**
@@ -23,6 +25,7 @@ import utils.EMF_Creator;
 public class DemoResource {
     
     private static final EntityManagerFactory EMF = EMF_Creator.createEntityManagerFactory();
+    private final UserFacade userFacade = UserFacade.getUserFacade(EMF);
     @Context
     private UriInfo context;
 
@@ -67,5 +70,18 @@ public class DemoResource {
     public String getFromAdmin() {
         String thisuser = securityContext.getUserPrincipal().getName();
         return "{\"msg\": \"Hello to (admin) User: " + thisuser + "\"}";
+    }
+
+    @Path("/register")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String registerUser(String user) throws API_Exception {
+        try {
+            userFacade.registerUser(user);
+            return "You have been registered";
+        }catch(API_Exception e){
+            throw new API_Exception(e.getMessage());
+        }
     }
 }
