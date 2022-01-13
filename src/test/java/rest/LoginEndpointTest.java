@@ -248,7 +248,7 @@ public class LoginEndpointTest {
                 .get("/info/getAllAssistants").then()
                 .statusCode(200)
                 .body("name", hasItems("Svante", "Lars"))
-                .body("size()", equalTo(2));
+                .body("size()", equalTo(14));
     }
 
     @Test
