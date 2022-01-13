@@ -98,19 +98,6 @@ public class DemoResource {
     }
 
 
-    //US-1 As a user I would like to see all washing assistants
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("getAllAssistants")
-    public String getAllAssistants() {
-        try {
-            List<WashingAssistantsDTO> washingAssistantsDTOs = userFacade.getAllAssistants();
-            return gson.toJson(washingAssistantsDTOs);
-        }catch(WebApplicationException e){
-            String errorString = "{\"code\": " + e.getResponse().getStatus() + ", \"message\": \"" + e.getMessage() + "\"}";
-            return errorString;
-        }
-    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -125,6 +112,20 @@ public class DemoResource {
         }
     }
 
+    //US-1 As a user I would like to see all washing assistants
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("getAllAssistants")
+    public String getAllAssistants() {
+        try {
+            List<WashingAssistantsDTO> washingAssistantsDTOs = userFacade.getAllAssistants();
+            return new Gson().toJson(washingAssistantsDTOs);
+        }catch(WebApplicationException e){
+            String errorString = "{\"code\": " + e.getResponse().getStatus() + ", \"message\": \"" + e.getMessage() + "\"}";
+            return errorString;
+        }
+    }
+
     //US-2 As a user I would like to see all my bookings
     @Path("/getBooking/{username}")
     // @RolesAllowed("user")
@@ -132,8 +133,8 @@ public class DemoResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String getBookingByUser(@PathParam("username") String username) {
         try {
-            List<BookingDTO> list = userFacade.getBookingByUser(username);
-            return gson.toJson(list);
+            List<BookingDTO> booking = userFacade.getBookingByUser(username);
+            return gson.toJson(booking);
         } catch (WebApplicationException ex) {
             throw new WebApplicationException(ex.getMessage(),ex.getResponse().getStatus());
         }
@@ -145,27 +146,23 @@ public class DemoResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/connectAssistantToBooking/{id}")
-    public String connectBoatToHarbour(@PathParam("id") String bookingId, String assistantId){
+    public String connectAssistantToBooking(@PathParam("id") String bookingId, String assistantId){
         userFacade.connectAssistantToBooking(bookingId,assistantId);
         return "";
     }
-
-
-   // US-4 As an admin I would like to create a new washing assistant
-   @POST
-   @Consumes(MediaType.APPLICATION_JSON)
-   @Produces(MediaType.APPLICATION_JSON)
-   @Path("/createAssistant")
-   public String createAssistant(String jsonBoat){
-       try {
-           WashingAssistantsDTO washingAssistantsDTO = userFacade.createAssistant(jsonBoat);
-           return gson.toJson(washingAssistantsDTO);
-       }catch(WebApplicationException e){
-           throw new WebApplicationException(e.getMessage());
-       }
-   }
-
-
+    // US-4 As an admin I would like to create a new washing assistant
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/createAssistant")
+    public String createAssistant(String jsonBoat){
+        try {
+            WashingAssistantsDTO washingAssistantsDTO = userFacade.createAssistant(jsonBoat);
+            return gson.toJson(washingAssistantsDTO);
+        }catch(WebApplicationException e){
+            throw new WebApplicationException(e.getMessage());
+        }
+    }
 
     //US-6 As an admin I would like to update all information about users, bookings, and cars
     @PUT
@@ -188,6 +185,7 @@ public class DemoResource {
 
 
     //US-7 As an admin I would like to delete a booking
+    @RolesAllowed("admin")
     @Path("/deleteBooking/{id}")
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
@@ -202,4 +200,6 @@ public class DemoResource {
         }
 
     }
+
+
 }

@@ -19,9 +19,17 @@ public class SetupTestUsers {
     EntityManager em = emf.createEntityManager();
 
     WashingAssistants washingAssistants = new WashingAssistants("James","English",5,200);
-    User user1 = new User("test","1234");
+    User user1 = new User("test1","1234");
+    User user2 = new User("test2","1234");
+    User user3 = new User("test3","1234");
+    User user4 = new User("test4","1234");
     Booking booking = new Booking(user1,LocalDateTime.now(), 25);
     Booking booking1 = new Booking(user1,LocalDateTime.now(), 50);
+    Booking booking2 = new Booking(user2,LocalDateTime.now(), 76);
+    Booking booking3 = new Booking(user3,LocalDateTime.now(), 100);
+    Booking booking4 = new Booking(user4,LocalDateTime.now(), 15);
+    Booking booking5 = new Booking(user2,LocalDateTime.now(), 20);
+    Booking booking6 = new Booking(user3,LocalDateTime.now(), 10);
     Car car = new Car("md43201", "Audi", "a6","2018");
     // IMPORTAAAAAAAAAANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // This breaks one of the MOST fundamental security rules in that it ships with default users and passwords
@@ -55,8 +63,16 @@ public class SetupTestUsers {
     em.persist(washingAssistants);
     em.persist(booking);
     em.persist(booking1);
+    em.persist(booking2);
+    em.persist(booking3);
+    em.persist(booking4);
+    em.persist(booking5);
+    em.persist(booking6);
     em.persist(car);
     em.persist(user1);
+    em.persist(user2);
+    em.persist(user3);
+    em.persist(user4);
 
     em.getTransaction().commit();
     System.out.println("PW: " + user.getUserPass());

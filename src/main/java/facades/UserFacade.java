@@ -104,21 +104,7 @@ public class UserFacade {
         }
     }
 
-    //US-7 As an admin I would like to delete a booking - We need to get all bookings
-    public List<BookingDTO> getAllBookings() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<Booking> query = em.createQuery("SELECT b FROM Booking b", Booking.class);
-            List<Booking> bookingsList = query.getResultList();
-            ArrayList<BookingDTO> bookingDTOS = new ArrayList<>();
-            for (Booking bookings : bookingsList) {
-                bookingDTOS.add(new BookingDTO(bookings));
-            }
-            return bookingDTOS;
-        } catch (WebApplicationException e) {
-            throw new WebApplicationException("Doesn't work", 500);
-        }
-    }
+
 
     //US-2 As a user I would like to see all my bookings
     public List<BookingDTO> getBookingByUser(String username) throws WebApplicationException {
@@ -138,6 +124,23 @@ public class UserFacade {
             em.close();
         }
     }
+
+    /*public BookingDTO getBookingByUser(Integer id) throws WebApplicationException {
+        EntityManager em = emf.createEntityManager();
+        Booking booking;
+        BookingDTO bookingDTO;
+        try {
+            booking = em.find(Booking.class, id);
+            bookingDTO = new BookingDTO(booking);
+            return bookingDTO;
+        } catch (RuntimeException ex) {
+            throw new WebApplicationException(ex.getMessage(), 500);
+        } finally {
+            em.close();
+        }
+    }
+
+     */
 
     //US-3 As a user I would like to make a booking and assign one or more washing assistants
     public WashingAssistantsDTO connectAssistantToBooking(String bookingId, String assistantJSON) {
@@ -208,23 +211,6 @@ public class UserFacade {
 
 
 //US-6 As an admin I would like to update all information about users, bookings, and cars
-/*public CarDTO editCar(CarDTO carDTO) {
-    EntityManager em = emf.createEntityManager();
-    Car car;
-
-    try {
-        car = em.find(Car.class, carDTO.getId());
-        em.getTransaction().begin();
-        em.persist(car);
-        em.getTransaction().commit();
-    } catch (WebApplicationException e) {
-        throw new WebApplicationException(e);
-    } finally {
-        em.close();
-    }
-    return new CarDTO(car);
-}*/
-//Edit car
     public CarDTO editCar(String carId, CarDTO carDTO){
         EntityManager em = emf.createEntityManager();
         int carIdInt = Integer.parseInt(carId);
@@ -242,6 +228,7 @@ public class UserFacade {
 
         return new CarDTO(car);
     }
+    //US-6 As an admin I would like to update all information about users, bookings, and cars
     public BookingDTO editBooking(String bookingId, BookingDTO bookingDTO){
         EntityManager em = emf.createEntityManager();
         int bookingIdInt = Integer.parseInt(bookingId);
@@ -275,6 +262,21 @@ public BookingDTO deleteBooking(Integer id) throws WebApplicationException {
         em.close();
     }
 }
+    //US-7 As an admin I would like to delete a booking - We need to get all bookings
+    public List<BookingDTO> getAllBookings() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Booking> query = em.createQuery("SELECT b FROM Booking b", Booking.class);
+            List<Booking> bookingsList = query.getResultList();
+            ArrayList<BookingDTO> bookingDTOS = new ArrayList<>();
+            for (Booking bookings : bookingsList) {
+                bookingDTOS.add(new BookingDTO(bookings));
+            }
+            return bookingDTOS;
+        } catch (WebApplicationException e) {
+            throw new WebApplicationException("Doesn't work", 500);
+        }
+    }
 
 
 

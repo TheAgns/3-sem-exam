@@ -1,25 +1,31 @@
 package rest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import dtos.BookingDTO;
+import dtos.WashingAssistantsDTO;
+import entities.Booking;
 import entities.User;
 import entities.Role;
 
+import entities.WashingAssistants;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
 import java.net.URI;
+import java.time.LocalDateTime;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import static org.hamcrest.Matchers.equalTo;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.Matchers.hasItems;
+
+import org.junit.jupiter.api.*;
 import utils.EMF_Creator;
 
 //Disabled
@@ -28,10 +34,14 @@ public class LoginEndpointTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
     private static HttpServer httpServer;
     private static EntityManagerFactory emf;
-    
+    WashingAssistants washingAssistants;
+    WashingAssistants washingAssistants2;
+    Booking booking1;
+
     static HttpServer startServer() {
         ResourceConfig rc = ResourceConfig.forApplication(new ApplicationConfig());
         return GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);
@@ -69,6 +79,11 @@ public class LoginEndpointTest {
             em.createQuery("delete from User").executeUpdate();
             em.createQuery("delete from Role").executeUpdate();
 
+            User user4 = new User("test","1234");
+            washingAssistants = new WashingAssistants("Svante", "Swedish",Integer.parseInt("2"),Double.parseDouble("50"));
+            washingAssistants2 = new WashingAssistants("Lars", "Norge",Integer.parseInt("5"),Double.parseDouble("100"));
+            booking1 = new Booking(user4, LocalDateTime.now(), 55);
+
             Role userRole = new Role("user");
             Role adminRole = new Role("admin");
             User user = new User("user", "test");
@@ -80,6 +95,8 @@ public class LoginEndpointTest {
             both.addRole(adminRole);
             em.persist(userRole);
             em.persist(adminRole);
+            em.persist(washingAssistants);
+            em.persist(washingAssistants2);
             em.persist(user);
             em.persist(admin);
             em.persist(both);
@@ -220,5 +237,63 @@ public class LoginEndpointTest {
                 .body("code", equalTo(403))
                 .body("message", equalTo("Not authenticated - do login"));
     }
+
+    @Test
+    @DisplayName("US-1 As a user I would like to see all washing assistants")
+    public void getAllAssistants() {
+        logOut();
+        given()
+                .contentType("application/json")
+                .when()
+                .get("/info/getAllAssistants").then()
+                .statusCode(200)
+                .body("name", hasItems("Svante", "Lars"))
+                .body("size()", equalTo(2));
+    }
+
+    @Test
+    @DisplayName("US-4 As an admin I would like to create a new washing assistant")
+    public void createAssistant() {
+        WashingAssistants washingAssistants = new WashingAssistants("Jeppe",
+                "Dansk",Integer.parseInt("2"),Double.parseDouble("50"));
+        WashingAssistantsDTO washingAssistantsDTO = new WashingAssistantsDTO(washingAssistants);
+
+        String requestBody = new Gson().toJson(washingAssistantsDTO);
+
+        given()
+                .contentType("application/json")
+                // .header("x-access-token", securityToken)
+                .and()
+                .body(requestBody)
+                .post("/info/createAssistant")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("name", equalTo("Jeppe"))
+                .body("primaryLanguage",equalTo("Dansk"));
+    }
+
+   /* @Test
+    @DisplayName("US-7 As an admin I would like to delete a booking")
+   public void deleteBooking() throws Exception {
+       login("admin", "test2");
+
+        BookingDTO bookingDTO = new BookingDTO(booking1);
+
+        String requestBody = GSON.toJson(bookingDTO);
+
+        given()
+                //.contentType("application/json")
+                .header("Content-type","application/json","x-access-token", securityToken)
+                //.header("x-access-token", securityToken)
+                //.queryParam("id", bookingDTO.getId())
+                .and()
+                .body(requestBody)
+                .delete("/info/deleteBooking/{id}", bookingDTO.getId())
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body(equalTo("removed"));
+    }*/
 
 }

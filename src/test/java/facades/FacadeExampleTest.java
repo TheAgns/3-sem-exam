@@ -1,5 +1,8 @@
 package facades;
 
+import dtos.BookingDTO;
+import entities.Booking;
+import entities.User;
 import utils.EMF_Creator;
 import entities.RenameMe;
 import javax.persistence.EntityManager;
@@ -11,13 +14,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 //Uncomment the line below, to temporarily disable this test
 //@Disabled
 public class FacadeExampleTest {
 
     private static EntityManagerFactory emf;
     private static FacadeExample facade;
-
+    private static UserFacade userFacade;
+    User user = new User("Peter","1234");
+    private Booking booking1 = new Booking(user, LocalDateTime.now(),25);
     public FacadeExampleTest() {
     }
 
@@ -25,6 +32,7 @@ public class FacadeExampleTest {
     public static void setUpClass() {
        emf = EMF_Creator.createEntityManagerFactoryForTest();
        facade = FacadeExample.getFacadeExample(emf);
+       userFacade = UserFacade.getUserFacade(emf);
     }
 
     @AfterAll
@@ -42,6 +50,8 @@ public class FacadeExampleTest {
             em.createNamedQuery("RenameMe.deleteAllRows").executeUpdate();
             em.persist(new RenameMe("Some txt", "More text"));
             em.persist(new RenameMe("aaa", "bbb"));
+            em.persist(booking1);
+            em.persist(user);
 
             em.getTransaction().commit();
         } finally {
@@ -59,6 +69,7 @@ public class FacadeExampleTest {
     public void testAFacadeMethod() throws Exception {
         assertEquals(2, facade.getRenameMeCount(), "Expects two rows in the database");
     }
+
     
 
 }
